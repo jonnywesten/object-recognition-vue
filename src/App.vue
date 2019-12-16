@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="text-center">
+    <div id="app" class="text-center pt-5">
 
         <img alt="Vue logo" src="./assets/logo.png"/>
         <h1>vue-object-recognition</h1>
@@ -58,6 +58,7 @@
 
             this.model = await cocoSSD.load();
             this.loaded = true;
+
         }
 
         setMode(mode: string){
@@ -67,7 +68,6 @@
 </script>
 
 <style lang="scss">
-
 
     @import "styles/loading";
 
@@ -82,9 +82,5 @@
         color: #e1e1e1;
         font-family: Helvetica, Arial, sans-serif;
     }
-
-
-
-
 
 </style>

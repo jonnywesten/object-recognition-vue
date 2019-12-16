@@ -11,7 +11,7 @@
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
     import * as cocoSSD from '@tensorflow-models/coco-ssd';
-
+    import PredictionRenderer from "./PredictionRenderer";
 
     @Component
     export default class Camera extends Vue {
@@ -21,6 +21,7 @@
         private video: HTMLVideoElement;
         private canvas: HTMLCanvasElement;
         private predictions: string = "...";
+        private predictionRenderer = new PredictionRenderer();
 
         created() {
             this.webcam_init();
@@ -39,61 +40,27 @@
                     this.video.onloadedmetadata = ()=>{
 
                         this.video.play();
-                        this.detectFrame(this.video, this.model);
+
+                        const ctx = <CanvasRenderingContext2D>this.canvas.getContext("2d");
+                        this.detectFrame(this.video, this.model, ctx);
                     }
                 });
         }
 
 
-        detectFrame(video: HTMLVideoElement, model: cocoSSD.ObjectDetection) {
+        detectFrame(video: HTMLVideoElement, model: cocoSSD.ObjectDetection, ctx: CanvasRenderingContext2D) {
 
             model.detect(video).then((predictions: Array<any>) => {
 
-                this.renderPredictions(predictions);
-
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                this.predictionRenderer.render(predictions, ctx);
                 this.predictions = predictions.map(el => el.class).join(", ") || '...';
 
                 requestAnimationFrame(() => {
-                    this.detectFrame(video, model);
+                    this.detectFrame(video, model, ctx);
                 });
             });
         }
-
-        renderPredictions(predictions:Array<any>) {
-
-
-            const ctx = this.canvas.getContext("2d") || new CanvasRenderingContext2D();
-
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            // Font options.
-            const font = "16px sans-serif";
-            ctx.font = font;
-            ctx.textBaseline = "top";
-
-            predictions.forEach(prediction => {
-                const x = prediction.bbox[0];
-                const y = prediction.bbox[1];
-                const width = prediction.bbox[2];
-                const height = prediction.bbox[3];
-                // Draw the bounding box.
-                ctx.strokeStyle = "#00FFFF";
-                ctx.lineWidth = 4;
-                ctx.strokeRect(x, y, width, height);
-                // Draw the label background.
-                ctx.fillStyle = "#00FFFF";
-                const textWidth = ctx.measureText(prediction.class).width;
-                const textHeight = parseInt(font, 10); // base 10
-                ctx.fillRect(x, y, textWidth + 4, textHeight + 4);
-            });
-
-            predictions.forEach(prediction => {
-                const x = prediction.bbox[0];
-                const y = prediction.bbox[1];
-                // Draw the text last to ensure it's on top.
-                ctx.fillStyle = "#000000";
-                ctx.fillText(prediction.class, x, y);
-            });
-        };
 
     }
 </script>
