@@ -2,7 +2,7 @@
     <div id="app" class="text-center pt-5">
 
         <img alt="Vue logo" src="./assets/logo.png"/>
-        <h1>vue-object-recognition</h1>
+        <h1>Object recognition</h1>
 
         <div class="loading" v-if="!loaded">
             <div class="lds-facebook">
