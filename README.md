@@ -4,7 +4,7 @@ Using tensorflow.js to recognize objects in images or webcam stream.
 
 ## Live demo
 
-To see live demo[Click here] (https://danielelport.github.io/object-recognition-vue/)
+Click here for live demo[Click here](https://danielelport.github.io/object-recognition-vue/)
 
 ## Project setup
 ```
