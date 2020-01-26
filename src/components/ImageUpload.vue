@@ -48,12 +48,14 @@
             const ctx = <CanvasRenderingContext2D> this.canvas.getContext("2d");
 
             var image = new Image();
-            image.onload = (evt: any) => {
+            image.onload = (event: any) => {
 
+                var path = event.path || (event.composedPath && event.composedPath());
+                
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                ctx.canvas.width = Math.min(800, evt.path[0].width);
-                ctx.canvas.height = Math.min(600, evt.path[0].height);
+                ctx.canvas.width = Math.min(800, path[0].width
+                ctx.canvas.height = Math.min(600, path[0].height);
 
                 ctx.drawImage(image, 0, 0);
 
