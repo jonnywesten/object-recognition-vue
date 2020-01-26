@@ -54,7 +54,7 @@
                 
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                ctx.canvas.width = Math.min(800, path[0].width
+                ctx.canvas.width = Math.min(800, path[0].width);
                 ctx.canvas.height = Math.min(600, path[0].height);
 
                 ctx.drawImage(image, 0, 0);
