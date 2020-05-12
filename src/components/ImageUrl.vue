@@ -1,18 +1,9 @@
 <template>
     <div>
-        <div class="my-5">
-            <canvas ref="canvas" width="1" height="1"/>
+        <canvas ref="canvas" width="1" height="1"/>
 
-            <image-uploader :preview="false"
-                            capture="environment" :debug="1" doNotResize="gif" :autoRotate="true" outputFormat="verbose"
-                            @input="setImage">
-                <label for="fileInput" slot="upload-label" class="upload-label d-block">
-                    <div class="btn btn-primary mx-auto">
-                        Click to upload
-                    </div>
-                </label>
-            </image-uploader>
-        </div>
+        <input type="text" class="d-block w-75 mx-auto" v-model="url"/>
+        <div class="btn btn-primary" v-on:click="fetchImage">Load Image Url</div>
     </div>
 </template>
 
@@ -23,19 +14,20 @@
 
 
     @Component
-    export default class ImageUpload extends Vue {
+    export default class ImageUrl extends Vue {
 
         @Prop() private model: cocoSSD.ObjectDetection;
 
-        private loaded = false;
+        private url: string = '';
         private predictionRenderer = new PredictionRenderer();
 
-        setImage(file: any) {
-
-            this.loaded = true;
+        fetchImage() {
+            console.log(this.url);
 
             let $image = new Image();
-            $image.src = file.dataUrl;
+            $image.setAttribute("crossorigin", "anonymous");
+            $image.crossOrigin = "";
+            $image.src =  this.url;
             $image.onload = (evt: any) => {
 
                 const canvas = <HTMLCanvasElement>this.$refs.canvas;
@@ -52,19 +44,13 @@
                     this.predictionRenderer.render(predictions, ctx);
                 });
             };
-        };
+
+        }
     }
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-
-    #fileInput {
-        display: none;
-    }
-
-    .upload-icon {
-        fill: #e1e1e1;
-    }
 
 </style>

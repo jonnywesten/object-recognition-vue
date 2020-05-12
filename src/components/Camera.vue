@@ -1,10 +1,9 @@
 <template>
     <div>
         <div class="video-player">
-            <video ref="video"></video>
-            <canvas width="640" height="480" ref="canvas"></canvas>
+            <video ref="video"/>
+            <canvas width="640" height="480" ref="canvas"/>
         </div>
-        <h6>{{ predictions }}</h6>
     </div>
 </template>
 
@@ -18,47 +17,48 @@
 
         @Prop() private model: cocoSSD.ObjectDetection;
 
-        private video: HTMLVideoElement;
-        private canvas: HTMLCanvasElement;
-        private predictions: string = "...";
         private predictionRenderer = new PredictionRenderer();
+        private predictionInterval: number | undefined;
 
-        created() {
-            this.webcam_init();
+        async mounted() {
+            const video = await this.initWebcam(this.$refs.video);
+            this.predictionInterval = setInterval(()=>{
+                this.analyzeVideoFrame(video);
+            }, 50);
         }
 
-        webcam_init() {
-
-            navigator.mediaDevices
-                .getUserMedia({video: true})
-                .then(stream => {
-
-                    this.video = <HTMLVideoElement>this.$refs.video;
-                    this.canvas = <HTMLCanvasElement>this.$refs.canvas;
-
-                    this.video.srcObject = stream;
-                    this.video.onloadedmetadata = ()=>{
-
-                        this.video.play();
-
-                        const ctx = <CanvasRenderingContext2D>this.canvas.getContext("2d");
-                        this.detectFrame(this.video, this.model, ctx);
-                    }
-                });
+        beforeDestroy(){
+            clearInterval(this.predictionInterval);
         }
 
+        initWebcam(videoRef: Vue | Element | Vue[] | Element[]): Promise<HTMLVideoElement> {
 
-        detectFrame(video: HTMLVideoElement, model: cocoSSD.ObjectDetection, ctx: CanvasRenderingContext2D) {
+            return new Promise(resolve => {
 
-            model.detect(video).then((predictions: Array<any>) => {
+                navigator.mediaDevices
+                    .getUserMedia({video: true})
+                    .then(stream => {
+
+                        const video = <HTMLVideoElement>videoRef;
+
+                        video.srcObject = stream;
+                        video.onloadedmetadata = () => {
+                            video.play();
+                            resolve(video);
+                        }
+                    });
+            });
+        }
+
+        analyzeVideoFrame(video: HTMLVideoElement) {
+
+            this.model.detect(video).then((predictions: Array<any>) => {
+
+                const canvas = <HTMLCanvasElement>this.$refs.canvas;
+                const ctx = <CanvasRenderingContext2D>canvas.getContext("2d");
 
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 this.predictionRenderer.render(predictions, ctx);
-                this.predictions = predictions.map(el => el.class).join(", ") || '...';
-
-                requestAnimationFrame(() => {
-                    this.detectFrame(video, model, ctx);
-                });
             });
         }
 
@@ -68,14 +68,14 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 
-    .video-player{
+    .video-player {
         position: relative;
 
-        canvas, video{
-            border-radius: 15px;
+        canvas, video {
+            border-radius: 5px;
         }
 
-        canvas{
+        canvas {
             position: absolute;
             margin-left: -640px;
         }

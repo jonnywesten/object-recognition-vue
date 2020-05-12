@@ -1,26 +1,22 @@
 <template>
-    <div id="app" class="text-center pt-5">
+    <div id="app" class="text-center py-5">
 
         <img alt="Vue logo" src="./assets/logo.png"/>
         <h1>Object recognition</h1>
 
-        <div class="loading" v-if="!loaded">
-            <div class="lds-facebook">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-            <div class="lds-text">Loading tensorflow.js</div>
-        </div>
+        <div v-if="loading" class="mt-4">Loading tensorflow.js..</div>
 
-        <div v-if="loaded" class="text-center">
+        <div v-if="!loading" class="text-center">
 
-            <ul class="nav nav-pills w-25 my-3 mx-auto">
+            <ul class="nav nav-pills w-50 my-3 mx-auto pr-4">
+                <li class="nav-item mx-auto" @click="setMode('url')">
+                    <a class="nav-link" v-bind:class="{ active: mode === 'url' }">Image URL</a>
+                </li>
                 <li class="nav-item mx-auto" @click="setMode('image')">
-                    <a class="nav-link"  v-bind:class="{ active: mode === 'image' }">From Image</a>
+                    <a class="nav-link" v-bind:class="{ active: mode === 'image' }">Upload Image</a>
                 </li>
                 <li class="nav-item mx-auto" @click="setMode('camera')">
-                    <a class="nav-link"  v-bind:class="{ active: mode === 'camera' }">Webcam</a>
+                    <a class="nav-link" v-bind:class="{ active: mode === 'camera' }">Webcam</a>
                 </li>
             </ul>
 
@@ -32,6 +28,10 @@
                 <ImageUpload :model="model"/>
             </div>
 
+            <div v-if="mode === 'url'">
+                <ImageUrl :model="model"/>
+            </div>
+
         </div>
     </div>
 </template>
@@ -40,28 +40,28 @@
     import {Component, Prop, Vue} from "vue-property-decorator";
     import Camera from "./components/Camera.vue";
     import ImageUpload from "./components/ImageUpload.vue";
+    import ImageUrl from "./components/ImageUrl.vue";
     import * as cocoSSD from '@tensorflow-models/coco-ssd';
 
     @Component({
         components: {
             Camera,
-            ImageUpload
+            ImageUpload,
+            ImageUrl
         }
     })
     export default class App extends Vue {
 
-        model: cocoSSD.ObjectDetection;
-        loaded: boolean = false;
-        mode = "image";
+        model: cocoSSD.ObjectDetection | undefined;
+        loading = true;
+        mode = "url";
 
-        async mounted() {
-
+        async created() {
             this.model = await cocoSSD.load();
-            this.loaded = true;
-
+            this.loading = false;
         }
 
-        setMode(mode: string){
+        setMode(mode: string) {
             this.mode = mode;
         }
     }
@@ -69,9 +69,8 @@
 
 <style lang="scss">
 
-    @import "styles/loading";
-
     $primary: #41b883;
+    $text: #e1e1e1;
 
     @import "styles/bootstrap/bootstrap";
 
@@ -79,8 +78,17 @@
         width: 100%;
         height: 100%;
         background: #161618;
-        color: #e1e1e1;
+        color: $text;
         font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .btn-primary{
+        background: $primary;
+        color:  $text;
+    }
+
+    .nav-item{
+        cursor: pointer;
     }
 
 </style>
