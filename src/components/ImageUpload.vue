@@ -36,16 +36,16 @@
 
             let $image = new Image();
             $image.src = file.dataUrl;
-            $image.onload = (evt: any) => {
+            $image.onload = (event: any) => {
 
                 const canvas = <HTMLCanvasElement>this.$refs.canvas;
                 const ctx = <CanvasRenderingContext2D>canvas.getContext("2d");
 
+                const path = event.path || (event.composedPath && event.composedPath());
+                ctx.canvas.width = Math.min(800, path[0].width);
+                ctx.canvas.height = Math.min(600, path[0].height);
+
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-                ctx.canvas.width = Math.min(800, evt.path[0].width);
-                ctx.canvas.height = Math.min(600, evt.path[0].height);
-
                 ctx.drawImage($image, 0, 0);
 
                 this.model.detect(canvas).then((predictions: Array<Object>) => {
